@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>股票指标可视化</title>
+    <script src="/static/js/jquery-3.1.1.min.js"></script>
+    <script src="/static/js/highcharts.js"></script>
+    <script src="/static/js/exporting.js"></script>
+    <script src="/static/js/socket.io.js"></script>
+    <style>
+        .chart-container {
+            width: 100%;
+            height: 400px;
+            margin-bottom: 20px;
+        }
+        .indicator-value {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>股票指标分析 - 000001.SZ</h1>
+    
+    <div class="chart-container" id="priceChart"></div>
+    
+    <div class="indicator-value">
+        KDJ: 
+        K值: <span id="kValue">--</span>
+        D值: <span id="dValue">--</span>
+        J值: <span id="jValue">--</span>
+    </div>
+    <div class="chart-container" id="kdjChart"></div>
+    
+    <div class="indicator-value">
+        OBV: <span id="obvValue">--</span>
+    </div>
+    <div class="chart-container" id="obvChart"></div>
+    
+    <div class="indicator-value">
+        PSAR: <span id="psarValue">--</span>
+    </div>
+    <div class="chart-container" id="psarChart"></div>
+
+    <script>
+        // 初始化图表
+        const priceChart = new Highcharts.Chart({
+            chart: { renderTo: 'priceChart' },
+            title: { text: '股价走势' },
+            series: [{ name: '收盘价', data: [] }]
+        });
+
+        const obvChart = new Highcharts.Chart({
+            chart: { renderTo: 'obvChart' },
+            title: { text: 'OBV指标' },
+            yAxis: { title: { text: '成交量' } },
+            series: [{ name: 'OBV', data: [] }]
+        });
+
+        const kdjChart = new Highcharts.Chart({
+            chart: { renderTo: 'kdjChart' },
+            title: { text: 'KDJ指标' },
+            series: [
+                { name: 'K值', data: [] },
+                { name: 'D值', data: [] },
+                { name: 'J值', data: [] }
+            ]
+        });
+
+        const psarChart = new Highcharts.Chart({
+            chart: { renderTo: 'psarChart' },
+            title: { text: 'PSAR指标' },
+            series: [
+                { name: '收盘价', data: [] },
+                { name: 'PSAR', data: [], type: 'scatter' }
+            ]
+        });
+
+        // Socket.IO连接
+        const socket = io();
+        socket.on('stock_update', function(data) {
+            // 更新指标值
+            $('#kValue').text(data.k ? data.k.toFixed(2) : '--');
+            $('#dValue').text(data.d ? data.d.toFixed(2) : '--');
+            $('#jValue').text(data.j ? data.j.toFixed(2) : '--');
+            $('#obvValue').text(data.obv ? data.obv.toFixed(2) : '--');
+            $('#psarValue').text(data.psar ? data.psar.toFixed(2) : '--');
+            
+            // 更新图表
+            priceChart.series[0].addPoint([data.trade_date, data.close]);
+            kdjChart.series[0].addPoint([data.trade_date, data.k]);
+            kdjChart.series[1].addPoint([data.trade_date, data.d]);
+            kdjChart.series[2].addPoint([data.trade_date, data.j]);
+            obvChart.series[0].addPoint([data.trade_date, data.obv]);
+            psarChart.series[0].addPoint([data.trade_date, data.close]);
+            psarChart.series[1].addPoint([data.trade_date, data.psar]);
+        });
+    </script>
+</body>
+</html>
