@@ -47,8 +47,8 @@ graph TD
 ### 安装步骤
 1. 克隆项目仓库：
    ```bash
-   git clone https://github.com/your-repo/stock-analysis.git
-   cd stock-analysis
+   git clone https://github.com/1leiwj/Bigdata-predicts-stock-metrics.git
+   cd Bigdata-predicts-stock-metrics
    ```
 
 2. 设置Python虚拟环境：
